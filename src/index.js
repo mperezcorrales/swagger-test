@@ -5,14 +5,15 @@ const {join} = require('path');
 const morgan = require("morgan");
 const cors = require("cors");
 const swaggerUI = require("swagger-ui-express");
+const swStats = require('swagger-stats');
 const docs = require('./docs');
 const todoRouter = require('./routes/todos');
 
 const adapter = new FileSync(join(__dirname,'..','db.json'));
 const db = low(adapter);
-db.defaults({ todos:[] }).write();    
+db.defaults({ todos:[] }).write();
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4003;
 
 // app configs.
 app.db = db;
@@ -21,10 +22,11 @@ app.use(express.urlencoded({extended:false}));
 app.use(morgan("dev"));
 app.use(cors());
 app.use('/todos',todoRouter);
+app.use(swStats.getMiddleware({swaggerSpec:docs}));
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
 
 //initialize the app.
-async function initialize(){    
+async function initialize(){
     app.listen(PORT);
 };
 
